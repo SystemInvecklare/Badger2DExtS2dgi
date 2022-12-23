@@ -20,8 +20,12 @@ public class TextureGraphics extends AbstractRectangleGraphics<TextureGraphics> 
 	
 	@Override
 	protected void draw(S2dgiDrawCycle drawCycle, int centerX, int centerY) {
-		ITexture texture = FlashyS2dgiEngine.get().getTexture(textureReference);
+		ITexture texture = FlashyS2dgiEngine.get().getTexture(getTextureReference());
 		drawCycle.render(texture, -centerX, -centerY, getWidth(), getHeight(), getQuarterRotation(), getFlipX(), getFlipY());
+	}
+	
+	public ITextureReference getTextureReference() {
+		return textureReference;
 	}
 	
 	@Override
@@ -34,12 +38,12 @@ public class TextureGraphics extends AbstractRectangleGraphics<TextureGraphics> 
 	
 	@Override
 	public int getWidth() {
-		return FlashyS2dgiEngine.get().getTexture(textureReference).getWidth();
+		return FlashyS2dgiEngine.get().getTexture(getTextureReference()).getWidth();
 	}
 	
 	@Override
 	public int getHeight() {
-		return FlashyS2dgiEngine.get().getTexture(textureReference).getHeight();
+		return FlashyS2dgiEngine.get().getTexture(getTextureReference()).getHeight();
 	}
 	
 	public boolean getFlipX() {
