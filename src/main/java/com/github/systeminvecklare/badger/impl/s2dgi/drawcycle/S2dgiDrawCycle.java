@@ -24,8 +24,18 @@ public class S2dgiDrawCycle implements IDrawCycle {
 	private final Transform transform = new Transform(null);
 	private final Transform appliedTransform = new Transform(null);
 	private final IWindow window;
-	private final IMutableColor tint = IColor.createMutable(IColor.WHITE);
-	private final IMutableColor additive = IColor.createMutable(IColor.ZERO);
+	private final ColorAdjustComponent tintManager = new ColorAdjustComponent(IColor.WHITE) {
+		@Override
+		protected void apply(IWindow window, IColor currentValue) {
+			window.getGraphics().setTint(currentValue, IColor.INTERPRETER);
+		}
+	};
+	private final ColorAdjustComponent additiveManager = new ColorAdjustComponent(IColor.ZERO) {
+		@Override
+		protected void apply(IWindow window, IColor currentValue) {
+			window.getGraphics().setAdditive(currentValue, IColor.INTERPRETER);
+		}
+	};
 	private final Stack<IClippingRectangle> clipStack = new Stack<>();
 	
 	private final MutableClippingRectangle clipRectangleUtil = new MutableClippingRectangle();
@@ -48,8 +58,8 @@ public class S2dgiDrawCycle implements IDrawCycle {
 	public IDrawCycle reset() {
 		window.renderBegin();
 		transform.setToIdentity();
-		tint.setTo(IColor.WHITE);
-		additive.setTo(IColor.ZERO);
+		tintManager.reset();
+		additiveManager.reset();
 		clipStack.clear();
 		return this;
 	}
@@ -61,19 +71,68 @@ public class S2dgiDrawCycle implements IDrawCycle {
 	public void applyTransforms() {
 		appliedTransform.setTo(transform);
 	}
-
+	
 	public void setTint(IColor color) {
-		if (!tint.equals(color)) {
-			tint.setTo(color);
-			window.getGraphics().setTint(tint, IColor.INTERPRETER);
-		}
+		tintManager.set(window, color);
 	}
 
 	public void setAdditive(IColor color) {
-		if (!additive.equals(color)) {
-			additive.setTo(color);
-			window.getGraphics().setAdditive(additive, IColor.INTERPRETER);
-		}
+		additiveManager.set(window, color);
+	}
+	
+	public void setColorAdjust(IColor tintColor, IColor additiveColor) {
+		setTint(tintColor);
+		setAdditive(additiveColor);
+	}
+	
+	public IColor getTint() {
+		return tintManager.get();
+	}
+	
+	public IColor getAdditive() {
+		return additiveManager.get();
+	}
+	
+	public IMutableColor getTint(IMutableColor result) {
+		return tintManager.get(result);
+	}
+	
+	public IMutableColor getAdditive(IMutableColor result) {
+		return additiveManager.get(result);
+	}
+	
+	/**
+	 * Gets both tint and additive.
+	 */
+	public void getColorAdjust(IMutableColor tintResult, IMutableColor additiveResult) {
+		getTint(tintResult);
+		getAdditive(additiveResult);
+	}
+	
+	public void pushTint(IColor color) {
+		tintManager.push(window, color);
+	}
+	
+	public void pushAdditive(IColor color) {
+		additiveManager.push(window, color);
+	}
+	
+	public void pushColorAdjust(IColor tintColor, IColor additiveColor) {
+		pushTint(tintColor);
+		pushAdditive(additiveColor);
+	}
+	
+	public void popTint() {
+		tintManager.pop(window);
+	}
+	
+	public void popAdditive() {
+		additiveManager.pop(window);
+	}
+	
+	public void popColorAdjust() {
+		popTint();
+		popAdditive();
 	}
 	
 	private void pushDownCurrentClip() {
@@ -213,5 +272,50 @@ public class S2dgiDrawCycle implements IDrawCycle {
 			float npy = qsin*pos.getX()+qcos*pos.getY();
 			pos.setTo(npx, npy);
 		}
+	}
+	
+	private static abstract class ColorAdjustComponent {
+		private final IColor zeroState;
+		private final IMutableColor currentValue;
+		private final Stack<IColor> stack = new Stack<>();
+
+		public ColorAdjustComponent(IColor zeroState) {
+			this.zeroState = zeroState;
+			this.currentValue = IColor.createMutable(zeroState);
+		}
+
+
+		public void push(IWindow window, IColor color) {
+			stack.add(currentValue.immutableCopy());
+			set(window, color);
+		}
+		
+		public void pop(IWindow window) {
+			IColor popped = stack.isEmpty() ? null : stack.pop();
+			set(window, popped);
+		}
+
+		public void set(IWindow window, IColor color) {
+			color = color != null ? color : zeroState;
+			if (!currentValue.equals(color)) {
+				currentValue.setTo(color);
+				apply(window, currentValue);
+			}
+		}
+		
+		public IColor get() {
+			return currentValue.immutableCopy();
+		}
+		
+		public IMutableColor get(IMutableColor result) {
+			return result.setTo(currentValue);
+		}
+
+		public void reset() {
+			currentValue.setTo(zeroState);
+			stack.clear();
+		}
+		
+		protected abstract void apply(IWindow window, IColor currentValue);
 	}
 }

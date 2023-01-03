@@ -24,8 +24,8 @@ public class TextGraphics extends AbstractTextGraphics<TextGraphics, AbstractTex
 	}
 	
 	@Override
-	protected void drawImpl(S2dgiDrawCycle drawCycle, int anchorOffsetX, int anchorOffsetY, TextWrapper preparedText) {
-		preparedText.text.render(drawCycle, getOffsetX() - anchorOffsetX, getOffsetY() - anchorOffsetY);
+	protected void drawImpl(S2dgiDrawCycle drawCycle, int x, int y, TextWrapper preparedText) {
+		preparedText.text.render(drawCycle, x, y);
 	}
 }
 /*package-protected*/ class TextWrapper implements IComputedValues {

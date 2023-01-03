@@ -272,6 +272,11 @@ public interface IColor {
 	public IMutableColor setAlpha(int alpha) {
 		return setTo(INTERPRETER.getRed(this), INTERPRETER.getGreen(this), INTERPRETER.getBlue(this), alpha);
 	}
+	
+	@Override
+	public IColor immutableCopy() {
+		return new ColorImpl(mutableArgb);
+	}
 }
 
 /*package-private*/ class Util {

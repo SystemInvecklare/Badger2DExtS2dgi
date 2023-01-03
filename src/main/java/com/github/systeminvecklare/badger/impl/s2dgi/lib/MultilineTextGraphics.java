@@ -42,13 +42,13 @@ public class MultilineTextGraphics extends AbstractTextGraphics<MultilineTextGra
 	}
 	
 	@Override
-	protected void drawImpl(S2dgiDrawCycle drawCycle, int anchorOffsetX, int anchorOffsetY,
+	protected void drawImpl(S2dgiDrawCycle drawCycle, int x, int y,
 			ComputedValues preparedText) {
 		float currentRowAlign = getRowAlign();
 		int lineOffset = preparedText.lineHeight - preparedText.height;
 		for(IText line : preparedText.lines) {
 			int offsetFromAlign = align(currentRowAlign, line.getWidth(), preparedText.width);
-			line.render(drawCycle, offsetFromAlign + getOffsetX() - anchorOffsetX, getOffsetY() - anchorOffsetY - lineOffset);
+			line.render(drawCycle, offsetFromAlign + x, y - lineOffset);
 			lineOffset += preparedText.lineHeight;
 		}
 	}

@@ -4,15 +4,20 @@ import java.util.Objects;
 
 import com.github.systeminvecklare.badger.core.graphics.components.moviecliplayer.IMovieClipLayer;
 import com.github.systeminvecklare.badger.core.math.IReadablePosition;
+import com.github.systeminvecklare.badger.core.util.GeometryUtil;
 import com.github.systeminvecklare.badger.impl.s2dgi.drawcycle.S2dgiDrawCycle;
 import com.github.systeminvecklare.badger.impl.s2dgi.font.IFont;
+import com.github.systeminvecklare.badger.impl.s2dgi.graphics.IColor;
 import com.github.systeminvecklare.badger.impl.s2dgi.lib.widget.IWidget;
 import com.github.systeminvecklare.badger.impl.s2dgi.util.EqualsUtil;
 import com.github.systeminvecklare.badger.impl.s2dgi.util.ICached;
 
 /*package-protected*/ abstract class AbstractTextGraphics<Self, CK, CV extends AbstractTextGraphics.IComputedValues> extends S2dgiMovieClipLayer implements IMovieClipLayer, IWidget {
+	private boolean hittable = false;
 	private IFont font;
 	private String text;
+	private IColor tint = null;
+	private IColor additive = null;
 	
 	protected ICached<CK, CV> cache = ICached.of(this::recomputeValue);
 	
@@ -30,10 +35,38 @@ import com.github.systeminvecklare.badger.impl.s2dgi.util.ICached;
 	protected final void drawImpl(S2dgiDrawCycle drawCycle) {
 		CV preparedText = getFreshValues();
 		if(preparedText != null) {
-			int anchorOffsetX = anchor(getAnchorX(), 0, preparedText.getWidth());
-			int anchorOffsetY = anchor(getAnchorY(), 0, preparedText.getHeight());
-			drawImpl(drawCycle, anchorOffsetX, anchorOffsetY, preparedText);
+			final IColor currentTint = getTint();
+			final IColor currentAdditive = getAdditive();
+			if(currentTint != null) {
+				drawCycle.pushTint(currentTint);
+			}
+			if(currentAdditive != null) {
+				drawCycle.pushAdditive(currentAdditive);
+			}
+			drawImpl(drawCycle, getX(), getY(), preparedText);
+			if(currentTint != null) {
+				drawCycle.popTint();
+			}
+			if(currentAdditive != null) {
+				drawCycle.popAdditive();
+			}
 		}
+	}
+	
+	public int getX() {
+		CV preparedText = getFreshValues();
+		if(preparedText != null) {
+			return getOffsetX() - anchor(getAnchorX(), 0, preparedText.getWidth());
+		}
+		return getOffsetX();
+	}
+	
+	public int getY() {
+		CV preparedText = getFreshValues();
+		if(preparedText != null) {
+			return getOffsetY() - anchor(getAnchorY(), 0, preparedText.getHeight());
+		}
+		return getOffsetY();
 	}
 	
 	private static int anchor(float anchorPos, int start, int length) {
@@ -72,6 +105,24 @@ import com.github.systeminvecklare.badger.impl.s2dgi.util.ICached;
 		return anchorY;
 	}
 	
+	public Self setTint(IColor tint) {
+		this.tint = tint;
+		return self();
+	}
+	
+	public Self setAdditive(IColor additive) {
+		this.additive = additive;
+		return self();
+	}
+	
+	public IColor getTint() {
+		return tint;
+	}
+	
+	public IColor getAdditive() {
+		return additive;
+	}
+	
 	@SuppressWarnings("unchecked")
 	private Self self() {
 		return (Self) this;
@@ -105,10 +156,17 @@ import com.github.systeminvecklare.badger.impl.s2dgi.util.ICached;
 	
 	@Override
 	public boolean hitTest(IReadablePosition p) {
+		if(hittable) {
+			return GeometryUtil.isInRectangle(p.getX(), p.getY(), getX(), getY(), getWidth(), getHeight());
+		}
 		return false;
 	}
 	
-
+	public Self makeHittable() {
+		hittable = true;
+		return self();
+	}
+	
 	@Override
 	public void dispose() {
 		cache = null;

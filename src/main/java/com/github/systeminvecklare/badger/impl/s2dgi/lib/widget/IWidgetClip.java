@@ -8,7 +8,6 @@ import com.github.systeminvecklare.badger.core.util.MCUtil;
 public interface IWidgetClip extends IMovieClip {
 	int getWidth();
 	int getHeight();
-	boolean isInitialized();
 	
 	public static IWidgetInterface<IWidgetClip> INTERFACE = new IWidgetInterface<IWidgetClip>() {
 		@Override
