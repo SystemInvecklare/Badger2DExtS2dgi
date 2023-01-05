@@ -56,12 +56,12 @@ import java.util.Objects;
 			}
 		}
 	}
-
-	protected IWidgetInterface<IWidget> getDefaultInterface(IWidget widget) {
+	
+	protected void getDefaultInterface(IWidget widget, IDefaultInterfaceHandler handler) {
 		if(widget instanceof IResizableWidget) {
-			return IResizableWidget.INTERFACE;
+			handler.onWidget((IResizableWidget) widget, IResizableWidgetInterface.RESIZABLE_WIDGET_INTERFACE);
 		} else {
-			return IWidget.INTERFACE;
+			handler.onWidget(widget, IWidgetInterface.WIDGET_INTERFACE);
 		}
 	}
 	
@@ -79,10 +79,10 @@ import java.util.Objects;
 	
 	protected static class Child<W> {
 		public final W widget;
-		public final IWidgetInterface<W> widgetInterface;
+		public final IWidgetInterface<? super W> widgetInterface;
 		public final CellLayoutSettings layoutSettings;
 		
-		public Child(W widget, IWidgetInterface<W> widgetInterface, CellLayoutSettings layoutSettings) {
+		public Child(W widget, IWidgetInterface<? super W> widgetInterface, CellLayoutSettings layoutSettings) {
 			this.widget = widget;
 			this.widgetInterface = widgetInterface;
 			this.layoutSettings = layoutSettings.copy();
@@ -100,7 +100,7 @@ import java.util.Objects;
 			int height = widgetInterface.getHeight(widget);
 			
 			if((availableSpaceX > 0 || availableSpaceY > 0) && (layoutSettings.fillHorizontal || layoutSettings.fillVertical)) {
-				IResizableWidgetInterface<W, W> resizable = IResizableWidget.tryCast(widget, widgetInterface);
+				IResizableWidgetInterface<W> resizable = IResizableWidget.tryCast(widget, widgetInterface);
 				if(resizable != null) {
 					if(availableSpaceX > 0 && layoutSettings.fillHorizontal && width != availableSpaceX) {
 						resizable.setWidth(widget, availableSpaceX);
@@ -125,5 +125,9 @@ import java.util.Objects;
 			int height = layoutSettings.fillVertical ? layoutSettings.minHeight : widgetInterface.getHeight(widget);
 			return height+layoutSettings.paddingTop+layoutSettings.paddingBottom;
 		}
+	}
+	
+	protected interface IDefaultInterfaceHandler {
+		<W extends IWidget> void onWidget(W widget, IWidgetInterface<W> widgetInterface);
 	}
 }

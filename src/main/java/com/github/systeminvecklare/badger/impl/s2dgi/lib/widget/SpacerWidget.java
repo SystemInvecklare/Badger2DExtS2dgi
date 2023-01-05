@@ -1,6 +1,8 @@
 package com.github.systeminvecklare.badger.impl.s2dgi.lib.widget;
 
 public class SpacerWidget implements IWidget {
+	private int x;
+	private int y;
 	private final int width;
 	private final int height;
 	
@@ -21,10 +23,23 @@ public class SpacerWidget implements IWidget {
 
 	@Override
 	public void setPosition(int x, int y) {
+		this.x = x;
+		this.y = y;
 	}
 
 	@Override
 	public void addToPosition(int dx, int dy) {
+		setPosition(this.x + dx, this.y + dy);
+	}
+	
+	@Override
+	public int getX() {
+		return x;
+	}
+	
+	@Override
+	public int getY() {
+		return y;
 	}
 
 	public static SpacerWidget width(int width) {

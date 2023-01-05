@@ -4,30 +4,18 @@ public interface IResizableWidget extends IWidget {
 	void setWidth(int width);
 	void setHeight(int height);
 	
-	public static final IResizableWidgetInterface<IResizableWidget, IWidget> INTERFACE = extend(IWidget.INTERFACE);
-	
-	public static <B> IResizableWidgetInterface<IResizableWidget,B> extend(IWidgetInterface<B> widgetInterface) {
-		return new AbstractResizeableWidgetInterface<IResizableWidget, B>(widgetInterface) {
-			@Override
-			public void setWidth(IResizableWidget widget, int width) {
-				widget.setWidth(width);
-			}
-
-			@Override
-			public void setHeight(IResizableWidget widget, int height) {
-				widget.setHeight(height);
-			}
-		};
-	}
 	
 	@SuppressWarnings("unchecked")
-	public static <W> IResizableWidgetInterface<W,W> tryCast(W widget, IWidgetInterface<W> widgetInterface) {
+	public static <W> IResizableWidgetInterface<W> tryCast(W widget, IWidgetInterface<? super W> widgetInterface) {
 		if(widgetInterface instanceof IResizableWidgetInterface) {
-			return (IResizableWidgetInterface<W,W>) widgetInterface;
+			return (IResizableWidgetInterface<W>) widgetInterface;
 		} else if(widget instanceof IResizableWidget) {
-			return (IResizableWidgetInterface<W, W>) IResizableWidget.extend(widgetInterface);
-		} else {
-			return null;
+			if(widgetInterface == IWidgetInterface.WIDGET_INTERFACE) {
+				return (IResizableWidgetInterface<W>) IResizableWidgetInterface.RESIZABLE_WIDGET_INTERFACE;
+			} else {
+				return (IResizableWidgetInterface<W>) IResizableWidgetInterface.createExtension((IWidgetInterface<IResizableWidget>) widgetInterface, IResizableWidgetInterface._EXTENSION_RESIZABLE_WIDGET_INTERFACE);
+			}
 		}
+		return null;
 	}
 }

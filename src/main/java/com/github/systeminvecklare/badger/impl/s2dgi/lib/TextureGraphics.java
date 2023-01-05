@@ -4,7 +4,6 @@ import com.github.systeminvecklare.badger.core.graphics.components.moviecliplaye
 import com.github.systeminvecklare.badger.impl.s2dgi.FlashyS2dgiEngine;
 import com.github.systeminvecklare.badger.impl.s2dgi.drawcycle.S2dgiDrawCycle;
 import com.github.systeminvecklare.badger.impl.s2dgi.graphics.ITextureReference;
-import com.github.systeminvecklare.badger.impl.s2dgi.lib.widget.IWidgetInterface;
 
 import net.pointlessgames.libs.s2dgi.texture.ITexture;
 
@@ -72,6 +71,4 @@ public class TextureGraphics extends AbstractRectangleGraphics<TextureGraphics> 
 		this.quarterRotation = quarterRotation;
 		return this;
 	}
-	
-	public static final IWidgetInterface<TextureGraphics> WIDGET_INTERFACE = IWidgetInterface.cast(ARG_WIDGET_INTERFACE);
 }

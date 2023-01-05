@@ -3,11 +3,11 @@ package com.github.systeminvecklare.badger.impl.s2dgi.lib;
 import com.github.systeminvecklare.badger.core.math.IReadablePosition;
 import com.github.systeminvecklare.badger.core.util.GeometryUtil;
 import com.github.systeminvecklare.badger.impl.s2dgi.drawcycle.S2dgiDrawCycle;
-import com.github.systeminvecklare.badger.impl.s2dgi.lib.widget.IWidgetInterface;
+import com.github.systeminvecklare.badger.impl.s2dgi.lib.widget.IWidget;
 
-/*package-private*/ abstract class AbstractRectangleGraphics<T extends AbstractRectangleGraphics<?>> extends S2dgiMovieClipLayer {
-	private int centerX = 0;
-	private int centerY = 0;
+/*package-private*/ abstract class AbstractRectangleGraphics<T extends AbstractRectangleGraphics<?>> extends S2dgiMovieClipLayer implements IWidget {
+	private int x = 0;
+	private int y = 0;
 	private boolean hittable = false;
 	
 	@Override
@@ -25,8 +25,7 @@ import com.github.systeminvecklare.badger.impl.s2dgi.lib.widget.IWidgetInterface
 	
 	@SuppressWarnings("unchecked")
 	public T setCenter(int x, int y) {
-		this.centerX = x;
-		this.centerY = y;
+		setPosition(-x, -y);
 		return (T) this;
 	}
 	
@@ -50,36 +49,34 @@ import com.github.systeminvecklare.badger.impl.s2dgi.lib.widget.IWidgetInterface
 	}
 	
 	public int getCenterX() {
-		return centerX;
+		return -getX();
 	}
 	
 	public int getCenterY() {
-		return centerY;
+		return -getY();
 	}
-
-	public abstract int getWidth();
-	public abstract int getHeight();
-	protected abstract void draw(S2dgiDrawCycle drawCycle, int centerX, int centerY);
 	
-	protected static final IWidgetInterface<AbstractRectangleGraphics<?>> ARG_WIDGET_INTERFACE = new IWidgetInterface<AbstractRectangleGraphics<?>>() {
-		@Override
-		public void setPosition(AbstractRectangleGraphics<?> widget, int x, int y) {
-			widget.setCenter(-x, -y);
-		}
-		
-		@Override
-		public int getWidth(AbstractRectangleGraphics<?> widget) {
-			return widget.getWidth();
-		}
-		
-		@Override
-		public int getHeight(AbstractRectangleGraphics<?> widget) {
-			return widget.getHeight();
-		}
-		
-		@Override
-		public void addToPosition(AbstractRectangleGraphics<?> widget, int dx, int dy) {
-			widget.setCenter(widget.getCenterX()-dx, widget.getCenterY()-dy);
-		}
-	};
+	@Override
+	public int getX() {
+		return x;
+	}
+	
+	@Override
+	public int getY() {
+		return y;
+	}
+	
+	@Override
+	public void setPosition(int x, int y) {
+		this.x = x;
+		this.y = y;
+	}
+	
+	@Override
+	public void addToPosition(int dx, int dy) {
+		this.x += dx;
+		this.y += dy;
+	}
+	
+	protected abstract void draw(S2dgiDrawCycle drawCycle, int centerX, int centerY);
 }

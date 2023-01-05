@@ -2,9 +2,9 @@ package com.github.systeminvecklare.badger.impl.s2dgi.lib;
 
 import com.github.systeminvecklare.badger.impl.s2dgi.drawcycle.S2dgiDrawCycle;
 import com.github.systeminvecklare.badger.impl.s2dgi.graphics.IColor;
-import com.github.systeminvecklare.badger.impl.s2dgi.lib.widget.IWidgetInterface;
+import com.github.systeminvecklare.badger.impl.s2dgi.lib.widget.IResizableWidget;
 
-public class RectangleGraphics extends AbstractRectangleGraphics<RectangleGraphics> {
+public class RectangleGraphics extends AbstractRectangleGraphics<RectangleGraphics> implements IResizableWidget {
 	private int x;
 	private int y;
 	private int width;
@@ -57,10 +57,12 @@ public class RectangleGraphics extends AbstractRectangleGraphics<RectangleGraphi
 		this.y = y;
 	}
 	
+	@Override
 	public void setWidth(int width) {
 		this.width = width;
 	}
 	
+	@Override
 	public void setHeight(int height) {
 		this.height = height;
 	}
@@ -73,6 +75,4 @@ public class RectangleGraphics extends AbstractRectangleGraphics<RectangleGraphi
 	protected void draw(S2dgiDrawCycle drawCycle, int centerX, int centerY) {
 		drawCycle.renderRectangle(getX(), getY(), getWidth(), getHeight(), centerX, centerY, getColor());
 	}
-	
-	public static final IWidgetInterface<RectangleGraphics> WIDGET_INTERFACE = IWidgetInterface.cast(ARG_WIDGET_INTERFACE);
 }

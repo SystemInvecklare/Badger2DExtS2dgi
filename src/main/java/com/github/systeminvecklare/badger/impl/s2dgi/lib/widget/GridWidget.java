@@ -26,16 +26,21 @@ public class GridWidget extends AbstractParentWidget<GridWidget.GridChild<?>> im
 	}
 	
 	public <W extends IWidget> W addChild(W widget, int row, int column, ICellLayoutSettings layoutSettings) {
-		addChild((IWidget) widget, getDefaultInterface(widget), row, column, layoutSettings);
+		getDefaultInterface(widget, new IDefaultInterfaceHandler() {
+			@Override
+			public <W2 extends IWidget> void onWidget(W2 widget, IWidgetInterface<W2> widgetInterface) {
+				addChild(widget, widgetInterface, row, column, layoutSettings);
+			}
+		});
 		return widget;
 	}
 	
 	
-	public <W> W addChild(W widget, IWidgetInterface<W> widgetInterface, int row, int column) {
+	public <W> W addChild(W widget, IWidgetInterface<? super W> widgetInterface, int row, int column) {
 		return addChild(widget, widgetInterface, row, column, defaultLayoutSettings());
 	}
 	
-	public <W> W addChild(W widget, IWidgetInterface<W> widgetInterface, int row, int column, ICellLayoutSettings layoutSettings) {
+	public <W> W addChild(W widget, IWidgetInterface<? super W> widgetInterface, int row, int column, ICellLayoutSettings layoutSettings) {
 		return addChild(widget, widgetInterface, row, column, 1, 1, layoutSettings);
 	}
 	
@@ -46,22 +51,27 @@ public class GridWidget extends AbstractParentWidget<GridWidget.GridChild<?>> im
 	
 	public <W extends IWidget> W addChild(W widget, int row, int column, int occupiedRows,
 			int occupiedColumns, ICellLayoutSettings layoutSettings) {
-		addChild((IWidget) widget, getDefaultInterface(widget), row, column, occupiedRows, occupiedColumns, layoutSettings);
+		getDefaultInterface(widget, new IDefaultInterfaceHandler() {
+			@Override
+			public <W2 extends IWidget> void onWidget(W2 widget, IWidgetInterface<W2> widgetInterface) {
+				addChild(widget, widgetInterface, row, column, occupiedRows, occupiedColumns, layoutSettings);
+			}
+		});
 		return widget;
 	}
 	
 	
-	public <W> W addChild(W widget, IWidgetInterface<W> widgetInterface, int row, int column, int occupiedRows,
+	public <W> W addChild(W widget, IWidgetInterface<? super W> widgetInterface, int row, int column, int occupiedRows,
 			int occupiedColumns) {
 		return addChild(widget, widgetInterface, row, column, occupiedRows, occupiedColumns, defaultLayoutSettings());
 	}
 	
-	public <W> W addChild(W widget, IWidgetInterface<W> widgetInterface, int row, int column, int occupiedRows,
+	public <W> W addChild(W widget, IWidgetInterface<? super W> widgetInterface, int row, int column, int occupiedRows,
 			int occupiedColumns, ICellLayoutSettings layoutSettings) {
 		return addChild(widget, widgetInterface, row, column, occupiedRows, occupiedColumns, (CellLayoutSettings) layoutSettings);
 	}
 	
-	private <W> W addChild(W widget, IWidgetInterface<W> widgetInterface, int row, int column, int occupiedRows,
+	private <W> W addChild(W widget, IWidgetInterface<? super W> widgetInterface, int row, int column, int occupiedRows,
 			int occupiedColumns, CellLayoutSettings layoutSettings) {
 		children.add(new GridChild<W>(widget, widgetInterface, row, column, occupiedRows, occupiedColumns, layoutSettings));
 		return widget;
@@ -182,7 +192,7 @@ public class GridWidget extends AbstractParentWidget<GridWidget.GridChild<?>> im
 		private final int occupiedRows;
 		private final int occupiedColumns;
 		
-		public GridChild(W widget, IWidgetInterface<W> widgetInterface, int row, int column, int occupiedRows,
+		public GridChild(W widget, IWidgetInterface<? super W> widgetInterface, int row, int column, int occupiedRows,
 				int occupiedColumns, CellLayoutSettings layoutSettings) {
 			super(widget, widgetInterface, layoutSettings);
 			this.row = row;

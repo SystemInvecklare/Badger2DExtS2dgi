@@ -37,19 +37,24 @@ public class FrameWidget extends AbstractParentWidget<AbstractParentWidget.Child
 	}
 	
 	public <W extends IWidget> W addChild(W widget, ICellLayoutSettings layoutSettings) {
-		addChild(widget, getDefaultInterface(widget), layoutSettings);
+		getDefaultInterface(widget, new IDefaultInterfaceHandler() {
+			@Override
+			public <W2 extends IWidget> void onWidget(W2 widget, IWidgetInterface<W2> widgetInterface) {
+				addChild(widget, widgetInterface, layoutSettings);	
+			}
+		});
 		return widget;
 	}
 	
-	public <W> W addChild(W widget, IWidgetInterface<W> widgetInterface) {
+	public <W> W addChild(W widget, IWidgetInterface<? super W> widgetInterface) {
 		return addChild(widget, widgetInterface, defaultLayoutSettings());
 	}
 	
-	public <W> W addChild(W widget, IWidgetInterface<W> widgetInterface, ICellLayoutSettings layoutSettings) {
+	public <W> W addChild(W widget, IWidgetInterface<? super W> widgetInterface, ICellLayoutSettings layoutSettings) {
 		return addChild(widget, widgetInterface, (CellLayoutSettings) layoutSettings);
 	}
 	
-	private <W> W addChild(W widget, IWidgetInterface<W> widgetInterface, CellLayoutSettings layoutSettings) {
+	private <W> W addChild(W widget, IWidgetInterface<? super W> widgetInterface, CellLayoutSettings layoutSettings) {
 		children.add(new Child<W>(widget, widgetInterface, layoutSettings));
 		return widget;
 	}

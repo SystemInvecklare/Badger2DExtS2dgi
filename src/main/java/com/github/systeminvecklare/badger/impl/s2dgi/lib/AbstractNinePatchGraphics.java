@@ -4,12 +4,11 @@ import com.github.systeminvecklare.badger.core.graphics.components.moviecliplaye
 import com.github.systeminvecklare.badger.impl.s2dgi.FlashyS2dgiEngine;
 import com.github.systeminvecklare.badger.impl.s2dgi.drawcycle.S2dgiDrawCycle;
 import com.github.systeminvecklare.badger.impl.s2dgi.graphics.INinePatchReference;
-import com.github.systeminvecklare.badger.impl.s2dgi.lib.widget.AbstractResizeableWidgetInterface;
-import com.github.systeminvecklare.badger.impl.s2dgi.lib.widget.IResizableWidgetInterface;
+import com.github.systeminvecklare.badger.impl.s2dgi.lib.widget.IResizableWidget;
 
 import net.pointlessgames.libs.s2dgi.texture.ITexture;
 
-/*package-private*/ abstract class AbstractNinePatchGraphics<T extends AbstractNinePatchGraphics<?>> extends AbstractRectangleGraphics<T> implements IMovieClipLayer {
+/*package-private*/ abstract class AbstractNinePatchGraphics<T extends AbstractNinePatchGraphics<?>> extends AbstractRectangleGraphics<T> implements IMovieClipLayer, IResizableWidget {
 	private final INinePatchReference ninepatch;
 	private final boolean renderCenter;
 	private int width;
@@ -64,31 +63,23 @@ import net.pointlessgames.libs.s2dgi.texture.ITexture;
 		return ninepatch;
 	}
 	
+	@Override
 	public int getWidth() {
 		return width;
 	}
 	
+	@Override
 	public int getHeight() {
 		return height;
 	}
 	
+	@Override
 	public void setWidth(int width) {
 		this.width = width;
 	}
 	
+	@Override
 	public void setHeight(int height) {
 		this.height = height;
 	}
-	
-	protected static final IResizableWidgetInterface<AbstractNinePatchGraphics<?>, AbstractRectangleGraphics<?>> ANPG_WIDGET_INTERFACE = new AbstractResizeableWidgetInterface<AbstractNinePatchGraphics<?>, AbstractRectangleGraphics<?>>(ARG_WIDGET_INTERFACE) {
-		@Override
-		public void setWidth(AbstractNinePatchGraphics<?> widget, int width) {
-			widget.setWidth(width);
-		}
-
-		@Override
-		public void setHeight(AbstractNinePatchGraphics<?> widget, int height) {
-			widget.setHeight(height);
-		}
-	};
 }

@@ -1,30 +1,56 @@
 package com.github.systeminvecklare.badger.impl.s2dgi.lib.widget;
 
-public interface IWidget {
-	int getWidth();
-	int getHeight();
+import com.github.systeminvecklare.badger.core.graphics.components.FlashyEngine;
+import com.github.systeminvecklare.badger.core.graphics.components.movieclip.IMovieClip;
+import com.github.systeminvecklare.badger.core.graphics.components.transform.ITransform;
+import com.github.systeminvecklare.badger.core.graphics.components.transform.ITransformOperation;
+import com.github.systeminvecklare.badger.core.util.MCUtil;
+
+public interface IWidget extends IRectangle {
 	void setPosition(int x, int y);
 	void addToPosition(int dx, int dy);
 	
-	public static final IWidgetInterface<IWidget> INTERFACE = new IWidgetInterface<IWidget>() {
-		@Override
-		public int getWidth(IWidget widget) {
-			return widget.getWidth();
+	public static void setMovieClipPosition(IMovieClip movieClip, int x, int y) {
+		if(movieClip.isInitialized()) {
+			movieClip.modifyTransform(new ITransformOperation() {
+				@Override
+				public ITransform execute(ITransform transform) {
+					return transform.setPosition(x, y);
+				}
+			}, false, false);
+		} else {
+			MCUtil.manipulate(movieClip).setPosition(x, y).end();
 		}
-
-		@Override
-		public int getHeight(IWidget widget) {
-			return widget.getHeight();
+	}
+	
+	public static void addToMovieClipPosition(IMovieClip movieClip, int dx, int dy) {
+		if(movieClip.isInitialized()) {
+			movieClip.modifyTransform(new ITransformOperation() {
+				@Override
+				public ITransform execute(ITransform transform) {
+					return transform.addToPosition(dx, dy);
+				}
+			}, false, false);
+		} else {
+			MCUtil.manipulate(movieClip).addPosition(dx, dy).end();
 		}
-		
-		@Override
-		public void setPosition(IWidget widget, int x, int y) {
-			widget.setPosition(x, y);
+	}
+	
+	public static int getMovieClipX(IMovieClip movieClip) {
+		ITransform transform = FlashyEngine.get().getPoolManager().getPool(ITransform.class).obtain();
+		try {
+			return (int) MCUtil.getTransform(movieClip, transform).getPosition().getX();
+		} finally {
+			transform.free();
 		}
-		
-		@Override
-		public void addToPosition(IWidget widget, int dx, int dy) {
-			widget.addToPosition(dx, dy);
+	}
+	
+	public static int getMovieClipY(IMovieClip movieClip) {
+		ITransform transform = FlashyEngine.get().getPoolManager().getPool(ITransform.class).obtain();
+		try {
+			return (int) MCUtil.getTransform(movieClip, transform).getPosition().getY();
+		} finally {
+			transform.free();
 		}
-	};
+	}
 }
