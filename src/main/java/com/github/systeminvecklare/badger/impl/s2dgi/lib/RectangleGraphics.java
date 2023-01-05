@@ -1,8 +1,8 @@
 package com.github.systeminvecklare.badger.impl.s2dgi.lib;
 
+import com.github.systeminvecklare.badger.core.widget.IResizableWidget;
 import com.github.systeminvecklare.badger.impl.s2dgi.drawcycle.S2dgiDrawCycle;
 import com.github.systeminvecklare.badger.impl.s2dgi.graphics.IColor;
-import com.github.systeminvecklare.badger.impl.s2dgi.lib.widget.IResizableWidget;
 
 public class RectangleGraphics extends AbstractRectangleGraphics<RectangleGraphics> implements IResizableWidget {
 	private int x;

@@ -5,10 +5,10 @@ import java.util.Objects;
 import com.github.systeminvecklare.badger.core.graphics.components.moviecliplayer.IMovieClipLayer;
 import com.github.systeminvecklare.badger.core.math.IReadablePosition;
 import com.github.systeminvecklare.badger.core.util.GeometryUtil;
+import com.github.systeminvecklare.badger.core.widget.IWidget;
 import com.github.systeminvecklare.badger.impl.s2dgi.drawcycle.S2dgiDrawCycle;
 import com.github.systeminvecklare.badger.impl.s2dgi.font.IFont;
 import com.github.systeminvecklare.badger.impl.s2dgi.graphics.IColor;
-import com.github.systeminvecklare.badger.impl.s2dgi.lib.widget.IWidget;
 import com.github.systeminvecklare.badger.impl.s2dgi.util.EqualsUtil;
 import com.github.systeminvecklare.badger.impl.s2dgi.util.ICached;
 

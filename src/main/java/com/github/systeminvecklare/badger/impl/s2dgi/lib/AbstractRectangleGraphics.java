@@ -2,8 +2,8 @@ package com.github.systeminvecklare.badger.impl.s2dgi.lib;
 
 import com.github.systeminvecklare.badger.core.math.IReadablePosition;
 import com.github.systeminvecklare.badger.core.util.GeometryUtil;
+import com.github.systeminvecklare.badger.core.widget.IWidget;
 import com.github.systeminvecklare.badger.impl.s2dgi.drawcycle.S2dgiDrawCycle;
-import com.github.systeminvecklare.badger.impl.s2dgi.lib.widget.IWidget;
 
 /*package-private*/ abstract class AbstractRectangleGraphics<T extends AbstractRectangleGraphics<?>> extends S2dgiMovieClipLayer implements IWidget {
 	private int x = 0;

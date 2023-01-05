@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Objects;
 
 import com.github.systeminvecklare.badger.core.graphics.components.moviecliplayer.IMovieClipLayer;
+import com.github.systeminvecklare.badger.core.widget.IWidget;
 import com.github.systeminvecklare.badger.impl.s2dgi.drawcycle.S2dgiDrawCycle;
 import com.github.systeminvecklare.badger.impl.s2dgi.font.IFont;
 import com.github.systeminvecklare.badger.impl.s2dgi.font.IText;
 import com.github.systeminvecklare.badger.impl.s2dgi.font.ITextLayoutProcedure;
 import com.github.systeminvecklare.badger.impl.s2dgi.lib.AbstractTextGraphics.BaseCacheKey;
 import com.github.systeminvecklare.badger.impl.s2dgi.lib.AbstractTextGraphics.IComputedValues;
-import com.github.systeminvecklare.badger.impl.s2dgi.lib.widget.IWidget;
 import com.github.systeminvecklare.badger.impl.s2dgi.util.EqualsUtil;
 
 public class MultilineTextGraphics extends AbstractTextGraphics<MultilineTextGraphics, CacheKey, ComputedValues> implements IMovieClipLayer, IWidget {

@@ -1,10 +1,10 @@
 package com.github.systeminvecklare.badger.impl.s2dgi.lib;
 
 import com.github.systeminvecklare.badger.core.graphics.components.moviecliplayer.IMovieClipLayer;
+import com.github.systeminvecklare.badger.core.widget.IResizableWidget;
 import com.github.systeminvecklare.badger.impl.s2dgi.FlashyS2dgiEngine;
 import com.github.systeminvecklare.badger.impl.s2dgi.drawcycle.S2dgiDrawCycle;
 import com.github.systeminvecklare.badger.impl.s2dgi.graphics.INinePatchReference;
-import com.github.systeminvecklare.badger.impl.s2dgi.lib.widget.IResizableWidget;
 
 import net.pointlessgames.libs.s2dgi.texture.ITexture;
 
