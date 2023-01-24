@@ -191,7 +191,7 @@ public class S2dgiDrawCycle implements IDrawCycle {
 			boolean flipY) {
 		AwkwardTransform awkwardTransform = new AwkwardTransform(appliedTransform, x, y, width, height, centerX, centerY);
 		window.getGraphics().render(texture, awkwardTransform.x, awkwardTransform.y, awkwardTransform.width,
-				awkwardTransform.height, awkwardTransform.quarterRotations - quarterRotations, flipX, flipY, false);
+				awkwardTransform.height, awkwardTransform.quarterRotations - quarterRotations, flipX ^ awkwardTransform.flipX, flipY ^ awkwardTransform.flipY, false);
 	}
 	
 	public void renderTiled(ITexture texture, int offsetX, int offsetY, int x, int y, int width, int height) {
@@ -230,6 +230,8 @@ public class S2dgiDrawCycle implements IDrawCycle {
 		public final int width;
 		public final int height;
 		public final int quarterRotations;
+		public final boolean flipX;
+		public final boolean flipY;
 
 		public AwkwardTransform(IReadableTransform transform, int x, int y, int width, int height, int centerX, int centerY) {
 			EasyPooler ep = EasyPooler.obtainFresh();
@@ -259,6 +261,8 @@ public class S2dgiDrawCycle implements IDrawCycle {
 				this.x = x;
 				this.y = window.getHeight() - y - this.height;
 				this.quarterRotations = -quarterRotations;
+				this.flipX = transform.getScale().getX() < 0;
+				this.flipY = transform.getScale().getY() < 0;
 			} finally {
 				ep.freeAllAndSelf();
 			}
