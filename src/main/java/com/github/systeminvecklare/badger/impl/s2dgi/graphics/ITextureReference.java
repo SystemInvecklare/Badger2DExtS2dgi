@@ -17,4 +17,6 @@ public interface ITextureReference {
 	int getHeight();
 	
 	ITextureReference subTexture(int sourceX, int sourceY, int width, int height);
+	
+	String serialize();
 }

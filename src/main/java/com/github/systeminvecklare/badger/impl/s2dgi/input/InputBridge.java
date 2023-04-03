@@ -15,7 +15,6 @@ public class InputBridge implements IKeyListener, IMouseListener {
 	@Override
 	public void onPressed(int x, int y, MouseButton button) {
 		inputHandler.registerPointerDown(x, y, 0, convertMouseButton(button));
-		
 	}
 
 	private static int convertMouseButton(MouseButton button) {

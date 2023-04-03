@@ -30,12 +30,16 @@ import net.pointlessgames.libs.s2dgi.texture.ITexture;
 import net.pointlessgames.libs.s2dgi.window.IWindow;
 
 public class FlashyS2dgiEngine implements IFlashyEngine {
-	private FlashyPoolManager poolManager;
+	private final IPoolManager poolManager;
 	
 	public FlashyS2dgiEngine() {
-		this.poolManager = new FlashyPoolManager();
+		this(new FlashyPoolManager());
 	}
-
+	
+	public FlashyS2dgiEngine(IPoolManager poolManager) {
+		this.poolManager = poolManager;
+	}
+	
 	@Override
 	public IPoolManager getPoolManager() {
 		return poolManager;

@@ -1,5 +1,6 @@
 package com.github.systeminvecklare.badger.impl.s2dgi.graphics;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import com.github.systeminvecklare.badger.impl.s2dgi.FlashyS2dgiEngine;
@@ -29,7 +30,11 @@ public class TextureReference implements ITextureReference {
 	
 	@Override
 	public ITexture load(ISimple2DGraphics graphics) throws IOException {
-		return graphics.loadTexture(path);
+		try {
+			return graphics.loadTexture(path);
+		} catch(IOException e) {
+			throw new IOException(path, e);
+		}
 	}
 	
 	@Override
@@ -47,8 +52,25 @@ public class TextureReference implements ITextureReference {
 		return FlashyS2dgiEngine.get().getTexture(this).getHeight();
 	}
 	
+	@Override
+	public String serialize() {
+		return path;
+	}
+	
 	public static ITextureReference create(String path) {
 		return new TextureReference(path);
+	}
+	
+	public static ITextureReference deserialize(String serialized) {
+		//TODO Make much better! Use Base64 or some shit
+		if(serialized.startsWith("{")) {
+			String parentSerialization = serialized.substring(1, serialized.lastIndexOf("}"));
+			ITextureReference parent = deserialize(parentSerialization);
+			String[] parts = serialized.substring(serialized.lastIndexOf("}")+1).split("\\,");
+			return new SubTextureReference(parent, Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), Integer.parseInt(parts[3]));
+		} else {
+			return create(serialized);
+		}
 	}
 	
 	private static class SubTextureReference implements ITextureReference {
@@ -84,6 +106,12 @@ public class TextureReference implements ITextureReference {
 		@Override
 		public int getHeight() {
 			return height;
+		}
+		
+		@Override
+		public String serialize() {
+			//TODO pack tighter!
+			return "{"+parent.serialize()+"}"+sourceX+","+sourceY+","+width+","+height;
 		}
 	}
 }

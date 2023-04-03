@@ -53,7 +53,11 @@ import com.github.systeminvecklare.badger.impl.s2dgi.util.ICached;
 		}
 	}
 	
-	public int getX() {
+	/**
+	 * Override getOffsetX instead
+	 */
+	@Override
+	public final int getX() {
 		CV preparedText = getFreshValues();
 		if(preparedText != null) {
 			return getOffsetX() - anchor(getAnchorX(), 0, preparedText.getWidth());
@@ -61,7 +65,11 @@ import com.github.systeminvecklare.badger.impl.s2dgi.util.ICached;
 		return getOffsetX();
 	}
 	
-	public int getY() {
+	/**
+	 * Override getOffsetY instead
+	 */
+	@Override
+	public final int getY() {
 		CV preparedText = getFreshValues();
 		if(preparedText != null) {
 			return getOffsetY() - anchor(getAnchorY(), 0, preparedText.getHeight());

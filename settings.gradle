@@ -1,0 +1,3 @@
+include 'Badger2DCore'
+
+project(':Badger2DCore').projectDir = file("../Badger2DCore")
