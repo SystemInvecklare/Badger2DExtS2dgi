@@ -34,7 +34,11 @@ public class FontBuilder {
 	}
 	
 	public void addGlyph(int x, int y, int width, int height, int glyphOffsetX, int glyphOffsetY, char ... chars) {
-		IGlyphTemplate glyph = new GlyphTexture(sourceTexture.subTexture(x, y, width, height), glyphOffsetX, glyphOffsetY);
+		addGlyph(x, y, width, height, width, glyphOffsetX, glyphOffsetY, chars);
+	}
+	
+	public void addGlyph(int x, int y, int width, int height, int advance, int glyphOffsetX, int glyphOffsetY, char ... chars) {
+		IGlyphTemplate glyph = new GlyphTexture(sourceTexture.subTexture(x, y, width, height), advance, glyphOffsetX, glyphOffsetY);
 		for(char c : chars) {
 			glyphs.put(c, glyph);
 		}
@@ -164,18 +168,20 @@ public class FontBuilder {
 	
 	private static class GlyphTexture implements IGlyphTemplate {
 		private final ITextureReference subTexture;
-		private int glyphOffsetX;
-		private int glyphOffsetY;
+		private final int advance;
+		private final int glyphOffsetX;
+		private final int glyphOffsetY;
 		
-		public GlyphTexture(ITextureReference subTexture, int glyphOffsetX, int glyphOffsetY) {
+		public GlyphTexture(ITextureReference subTexture, int advance, int glyphOffsetX, int glyphOffsetY) {
 			this.subTexture = subTexture;
+			this.advance = advance;
 			this.glyphOffsetX = glyphOffsetX;
 			this.glyphOffsetY = glyphOffsetY;
 		}
 
 		@Override
 		public int getWidth() {
-			return subTexture.getWidth();
+			return advance;
 		}
 		
 		@Override

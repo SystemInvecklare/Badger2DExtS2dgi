@@ -55,7 +55,7 @@ public class BMFontLoader {
 				fontBuilder.setSourceTexture(pageMap.get(page));
 				currentlyLoadedPage = page;
 			}
-			fontBuilder.addGlyph(charData.x, charData.y, Math.max(charData.xadvance, charData.width), charData.height, charData.xoffset, fntData.commonData.base-charData.height-charData.yoffset, (char) charData.id.intValue());
+			fontBuilder.addGlyph(charData.x, charData.y, charData.width, charData.height, charData.xadvance, charData.xoffset, fntData.commonData.base-charData.height-charData.yoffset, (char) charData.id.intValue());
 		}
 		
 		return fontBuilder.build();
