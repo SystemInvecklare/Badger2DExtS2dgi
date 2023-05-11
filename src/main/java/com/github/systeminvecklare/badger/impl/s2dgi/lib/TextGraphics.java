@@ -1,5 +1,7 @@
 package com.github.systeminvecklare.badger.impl.s2dgi.lib;
 
+import java.util.function.BiConsumer;
+
 import com.github.systeminvecklare.badger.core.graphics.components.moviecliplayer.IMovieClipLayer;
 import com.github.systeminvecklare.badger.core.widget.IWidget;
 import com.github.systeminvecklare.badger.impl.s2dgi.drawcycle.S2dgiDrawCycle;
@@ -24,8 +26,12 @@ public class TextGraphics extends AbstractTextGraphics<TextGraphics, AbstractTex
 	}
 	
 	@Override
-	protected void drawImpl(S2dgiDrawCycle drawCycle, int x, int y, TextWrapper preparedText) {
-		preparedText.text.render(drawCycle, x, y);
+	protected final void drawImpl(S2dgiDrawCycle drawCycle, int x, int y, TextWrapper preparedText) {
+		overridableDrawImpl(drawCycle, x, y, (_x, _y) -> preparedText.text.render(drawCycle, _x, _y));
+	}
+	
+	protected void overridableDrawImpl(S2dgiDrawCycle drawCycle, int x, int y, BiConsumer<Integer, Integer> superDraw) {
+		superDraw.accept(x, y);
 	}
 }
 /*package-protected*/ class TextWrapper implements IComputedValues {
