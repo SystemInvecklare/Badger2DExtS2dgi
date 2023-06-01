@@ -23,40 +23,7 @@ import net.pointlessgames.libs.s2dgi.texture.ITexture;
 	
 	@Override
 	protected void draw(S2dgiDrawCycle drawCycle, int centerX, int centerY) {
-		INinePatchReference currentNinepatch = getNinepatch();
-		ITexture texture = FlashyS2dgiEngine.get().getTexture(currentNinepatch.geTextureReference());
-		final int textureWidth = texture.getWidth();
-		final int textureHeight = texture.getHeight();
-		
-		final int leftPad = currentNinepatch.getPadLeft();
-		final int rightPad = currentNinepatch.getPadRight();
-		final int topPad = currentNinepatch.getPadTop();
-		final int bottomPad = currentNinepatch.getPadBottom();
-		final int currentWidth = getWidth();
-		final int currentHeight = getHeight();
-		
-		final int midWidth = currentWidth - leftPad - rightPad;
-		final int centerHeight = currentHeight - topPad - bottomPad;
-		
-		ITexture bottomMidTexture = texture.createSubTexture(leftPad, textureHeight - bottomPad, textureWidth - rightPad - leftPad, bottomPad);
-		ITexture leftCenterTexture = texture.createSubTexture(0, topPad, leftPad, textureHeight - topPad - bottomPad);
-		ITexture midCenterTexture = renderCenter ? texture.createSubTexture(leftPad, topPad, textureWidth - rightPad - leftPad, textureHeight - topPad - bottomPad) : null;
-		ITexture rightCenterTexture = texture.createSubTexture(textureWidth - rightPad, topPad, rightPad, textureHeight - topPad - bottomPad);
-		ITexture topMidTexture = texture.createSubTexture(leftPad, 0, textureWidth - rightPad - leftPad, topPad);
-		
-		drawCycle.renderTiled(texture, 0, textureHeight - bottomPad, -centerX, -centerY, leftPad, bottomPad);
-		drawCycle.renderTiled(bottomMidTexture, 0, 0, (-centerX)+leftPad, -centerY, midWidth, bottomPad);
-		drawCycle.renderTiled(texture, rightPad , textureHeight - bottomPad, (-centerX) + currentWidth - rightPad, -centerY, rightPad, bottomPad);
-		
-		drawCycle.renderTiled(leftCenterTexture, 0, 0, -centerX, (-centerY) +bottomPad, leftPad, centerHeight);
-		if(renderCenter) {
-			drawCycle.renderTiled(midCenterTexture, 0, 0, (-centerX) + leftPad, (-centerY) + bottomPad, midWidth, centerHeight);
-		}
-		drawCycle.renderTiled(rightCenterTexture, 0, 0, (-centerX) + currentWidth - rightPad, (-centerY) + bottomPad, rightPad, centerHeight);
-		
-		drawCycle.renderTiled(texture, 0, 0, -centerX, (-centerY) + currentHeight - topPad, leftPad, topPad);
-		drawCycle.renderTiled(topMidTexture, 0, 0, (-centerX) + leftPad, (-centerY) + currentHeight - topPad, midWidth, topPad);
-		drawCycle.renderTiled(texture, rightPad , 0, (-centerX) + currentWidth - rightPad, (-centerY) + currentHeight - topPad, rightPad, topPad);
+		renderNinePatch(drawCycle, getNinepatch(), -getCenterX(), -getCenterY(), getWidth(), getHeight(), renderCenter);
 	}
 	
 	protected INinePatchReference getNinepatch() {
@@ -81,5 +48,39 @@ import net.pointlessgames.libs.s2dgi.texture.ITexture;
 	@Override
 	public void setHeight(int height) {
 		this.height = height;
+	}
+	
+	protected static void renderNinePatch(S2dgiDrawCycle drawCycle, INinePatchReference ninepatch, int x, int y, int width, int height, boolean renderCenter) {
+		ITexture texture = FlashyS2dgiEngine.get().getTexture(ninepatch.geTextureReference());
+		final int textureWidth = texture.getWidth();
+		final int textureHeight = texture.getHeight();
+		
+		final int leftPad = ninepatch.getPadLeft();
+		final int rightPad = ninepatch.getPadRight();
+		final int topPad = ninepatch.getPadTop();
+		final int bottomPad = ninepatch.getPadBottom();
+		
+		final int midWidth = width - leftPad - rightPad;
+		final int centerHeight = height - topPad - bottomPad;
+		
+		ITexture bottomMidTexture = texture.createSubTexture(leftPad, textureHeight - bottomPad, textureWidth - rightPad - leftPad, bottomPad);
+		ITexture leftCenterTexture = texture.createSubTexture(0, topPad, leftPad, textureHeight - topPad - bottomPad);
+		ITexture midCenterTexture = renderCenter ? texture.createSubTexture(leftPad, topPad, textureWidth - rightPad - leftPad, textureHeight - topPad - bottomPad) : null;
+		ITexture rightCenterTexture = texture.createSubTexture(textureWidth - rightPad, topPad, rightPad, textureHeight - topPad - bottomPad);
+		ITexture topMidTexture = texture.createSubTexture(leftPad, 0, textureWidth - rightPad - leftPad, topPad);
+		
+		drawCycle.renderTiled(texture, 0, textureHeight - bottomPad, x, y, leftPad, bottomPad);
+		drawCycle.renderTiled(bottomMidTexture, 0, 0, x+leftPad, y, midWidth, bottomPad);
+		drawCycle.renderTiled(texture, rightPad , textureHeight - bottomPad, x + width - rightPad, y, rightPad, bottomPad);
+		
+		drawCycle.renderTiled(leftCenterTexture, 0, 0, x, y +bottomPad, leftPad, centerHeight);
+		if(renderCenter) {
+			drawCycle.renderTiled(midCenterTexture, 0, 0, x + leftPad, y + bottomPad, midWidth, centerHeight);
+		}
+		drawCycle.renderTiled(rightCenterTexture, 0, 0, x + width - rightPad, y + bottomPad, rightPad, centerHeight);
+		
+		drawCycle.renderTiled(texture, 0, 0, x, y + height - topPad, leftPad, topPad);
+		drawCycle.renderTiled(topMidTexture, 0, 0, x + leftPad, y + height - topPad, midWidth, topPad);
+		drawCycle.renderTiled(texture, rightPad , 0, x + width - rightPad, y + height - topPad, rightPad, topPad);
 	}
 }
