@@ -1,6 +1,5 @@
 package com.github.systeminvecklare.badger.impl.s2dgi.graphics;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import com.github.systeminvecklare.badger.impl.s2dgi.FlashyS2dgiEngine;
