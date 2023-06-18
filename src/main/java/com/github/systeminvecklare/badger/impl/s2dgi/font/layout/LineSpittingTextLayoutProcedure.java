@@ -1,4 +1,4 @@
-package com.github.systeminvecklare.badger.impl.s2dgi.font;
+package com.github.systeminvecklare.badger.impl.s2dgi.font.layout;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,7 +8,7 @@ import java.util.List;
 
 public class LineSpittingTextLayoutProcedure implements ITextLayoutProcedure {
 	private final ILineConstraints lineConstraints;
-	private final CharacterEater characterEater = new CharacterEater();
+	private final AtomEater atomEater = new AtomEater();
 	private final TokenEater tokenEater = new TokenEater();
 	private final LineEater lineEater = new LineEater();
 	
@@ -17,11 +17,11 @@ public class LineSpittingTextLayoutProcedure implements ITextLayoutProcedure {
 	}
 
 	@Override
-	public <C extends Collection<String>> C layoutText(String text, C result) {
-		for(int i = 0; i < text.length(); ++i) {
-			characterEater.feedCharacter(text.charAt(i));
+	public <C extends Collection<String>> C layoutText(Iterable<ITextAtom> text, C result) {
+		for(ITextAtom atom : text) {
+			atomEater.feedAtom(atom);
 		}
-		characterEater.endOfMeal();
+		atomEater.endOfMeal();
 		result.addAll(lineEater.lines);
 		return result;
 	}
@@ -32,37 +32,37 @@ public class LineSpittingTextLayoutProcedure implements ITextLayoutProcedure {
 	
 	private static class Token {
 		public final boolean isWhitespace;
-		public final String text;
+		public final TextCompound text;
 		
-		public Token(boolean isWhitespace, String text) {
+		public Token(boolean isWhitespace, TextCompound text) {
 			this.isWhitespace = isWhitespace;
 			this.text = text;
 		}
 	}
 	
-	private class CharacterEater {
-		private final StringBuilder stringBuilder = new StringBuilder();
+	private class AtomEater {
+		private final List<ITextAtom> textCompoundBuilder = new ArrayList<>();
 		private boolean buildingWhitespace = true;
 		
-		public void feedCharacter(char c) {
-			if(c == '\n') {
+		public void feedAtom(ITextAtom atom) {
+			if(atom.is('\n')) {
 				tokenEater.feedToken(popToken());
-				tokenEater.feedToken(new Token(false, "\n"));
+				tokenEater.feedToken(new Token(false, TextCompound.ofChar('\n')));
 				buildingWhitespace = true;
 			} else {
-				boolean isWhitespace = Character.isWhitespace(c);
+				boolean isWhitespace = atom.isWhitespace();
 				if(isWhitespace == buildingWhitespace) {
-					stringBuilder.append(c);
+					textCompoundBuilder.add(atom);
 				} else {
 					tokenEater.feedToken(popToken());
-					stringBuilder.append(c);
+					textCompoundBuilder.add(atom);
 					buildingWhitespace = isWhitespace;
 				}
 			}
 		}
 
 		public void endOfMeal() {
-			if(stringBuilder.length() > 0) {
+			if(textCompoundBuilder.size() > 0) {
 				tokenEater.feedToken(popToken());
 			}
 			tokenEater.endOfMeal();
@@ -70,12 +70,12 @@ public class LineSpittingTextLayoutProcedure implements ITextLayoutProcedure {
 
 		private Token popToken() {
 			final Token token;
-			if(stringBuilder.length() == 0 && buildingWhitespace) {
+			if(textCompoundBuilder.size() == 0 && buildingWhitespace) {
 				token = null;
 			} else {
-				token = new Token(buildingWhitespace, stringBuilder.toString());
+				token = new Token(buildingWhitespace, new TextCompound(textCompoundBuilder.toArray(new ITextAtom[0]), 0, textCompoundBuilder.size()));
 			}
-			stringBuilder.setLength(0);
+			textCompoundBuilder.clear();
 			return token;
 		}
 	}
@@ -96,13 +96,13 @@ public class LineSpittingTextLayoutProcedure implements ITextLayoutProcedure {
 						if(tokens.isEmpty()) {
 							if(token.text.length() > 0) {
 								int breakPoint = 1;
-								while(lineConstraints.fits(token.text.substring(0, breakPoint))) {
+								while(lineConstraints.fits(token.text.substring(0, breakPoint).toString())) {
 									breakPoint++;
 								}
 								if(breakPoint > 1) {
 									breakPoint--;
 								}
-								lineEater.feedLine(token.text.substring(0, breakPoint));
+								lineEater.feedLine(token.text.substring(0, breakPoint).toString());
 								feedToken(new Token(token.isWhitespace, token.text.substring(breakPoint)));
 							}
 						} else {
