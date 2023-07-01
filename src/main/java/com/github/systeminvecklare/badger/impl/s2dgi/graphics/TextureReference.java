@@ -66,20 +66,20 @@ public class TextureReference implements ITextureReference {
 			String parentSerialization = serialized.substring(1, serialized.lastIndexOf("}"));
 			ITextureReference parent = deserialize(parentSerialization);
 			String[] parts = serialized.substring(serialized.lastIndexOf("}")+1).split("\\,");
-			return new SubTextureReference(parent, Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), Integer.parseInt(parts[3]));
+			return parent.subTexture(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), Integer.parseInt(parts[3]));
 		} else {
 			return create(serialized);
 		}
 	}
 	
 	private static class SubTextureReference implements ITextureReference {
-		private final ITextureReference parent;
+		private final TextureReference parent;
 		private final int sourceX;
 		private final int sourceY;
 		private final int width;
 		private final int height;
 
-		public SubTextureReference(ITextureReference parent, int sourceX, int sourceY, int width, int height) {
+		public SubTextureReference(TextureReference parent, int sourceX, int sourceY, int width, int height) {
 			this.parent = parent;
 			this.sourceX = sourceX;
 			this.sourceY = sourceY;
@@ -94,7 +94,7 @@ public class TextureReference implements ITextureReference {
 		
 		@Override
 		public ITextureReference subTexture(int sourceX, int sourceY, int width, int height) {
-			return new SubTextureReference(this, sourceX, sourceY, width, height);
+			return new SubTextureReference(parent, this.sourceX + sourceX, this.sourceY + sourceY, width, height);
 		}
 
 		@Override
