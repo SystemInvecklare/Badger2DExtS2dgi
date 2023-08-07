@@ -2,21 +2,19 @@ package com.github.systeminvecklare.badger.impl.s2dgi.drawcycle;
 
 import java.util.Stack;
 
+import com.github.systeminvecklare.badger.core.graphics.components.FlashyEngine;
 import com.github.systeminvecklare.badger.core.graphics.components.core.IDrawCycle;
 import com.github.systeminvecklare.badger.core.graphics.components.shader.IShader;
-import com.github.systeminvecklare.badger.core.graphics.components.transform.IReadableTransform;
 import com.github.systeminvecklare.badger.core.graphics.components.transform.ITransform;
 import com.github.systeminvecklare.badger.core.graphics.components.transform.Transform;
-import com.github.systeminvecklare.badger.core.math.IReadableVector;
 import com.github.systeminvecklare.badger.core.math.Mathf;
 import com.github.systeminvecklare.badger.core.math.Position;
-import com.github.systeminvecklare.badger.core.math.Vector;
-import com.github.systeminvecklare.badger.core.pooling.EasyPooler;
+import com.github.systeminvecklare.badger.core.pooling.IPool;
+import com.github.systeminvecklare.badger.core.pooling.IPoolManager;
 import com.github.systeminvecklare.badger.impl.s2dgi.graphics.IColor;
 import com.github.systeminvecklare.badger.impl.s2dgi.graphics.IMutableColor;
 
 import net.pointlessgames.libs.s2dgi.texture.ITexture;
-import net.pointlessgames.libs.s2dgi.util.ImplementationUtil;
 import net.pointlessgames.libs.s2dgi.window.IClippingRectangle;
 import net.pointlessgames.libs.s2dgi.window.IWindow;
 
@@ -154,16 +152,50 @@ public class S2dgiDrawCycle implements IDrawCycle {
 		replaceClipRectangleWithInfinite();
 	}
 	
+	private OrientableRectangle getTransformedRectangle(OrientableRectangle result, int centerX, int centerY) {
+		int quarterRotations = Mathf.mod((int) (2 * appliedTransform.getRotation().getTheta() / Mathf.PI + 0.5f), 4);
+		IntegerTransform integerTransform = FlashyEngine.get().getPoolManager().getPool(IntegerTransform.class).obtain().setToIdentity().setQuarterRotations(quarterRotations).setPosition(Math.round(appliedTransform.getPosition().getX()), Math.round(appliedTransform.getPosition().getY()));
+		
+		float sx = appliedTransform.getScale().getX();
+		float sy = appliedTransform.getScale().getY();
+		int x = result.getX() - centerX;
+		int y = result.getY() - centerY;
+		int width = result.getWidth();
+		int height = result.getHeight();
+		result.setTo(0, 0, 1, 1, result.getQuarterRotations(), result.getFlipX(), result.getFlipY()).scale(Math.round(width*sx), Math.round(height*sy)).add(Math.round(x*sx), Math.round(y*sy));
+		integerTransform.transform(result);
+		result.add(centerX, centerY);
+		
+		integerTransform.free();
+		
+//		return result;
+		//return result.scale(1, -1).add(0, window.getHeight());
+//		return result.setFlipY(!result.getFlipY()).scale(1, -1).add(0, window.getHeight());
+		return result.flipYAxis(window.getHeight());
+	}
+	
+	private IntVector getTransformedIntVector(IntVector result, IPoolManager poolManager) {
+		Position position = poolManager.getPool(Position.class).obtain().setTo(result);
+		appliedTransform.transform(position);
+		result.setTo(Math.round(position.getX()), Math.round(position.getY()));
+		position.free();
+		
+		return result.scale(1, -1).add(0, window.getHeight());
+	}
+	
 	public void clipRectangle(int x, int y, int width, int height) {
-		AwkwardTransform awkwardTransform = new AwkwardTransform(appliedTransform, x, y, width, height, 0, 0);
+		OrientableRectangle orientableRectangle = getTransformedRectangle(FlashyEngine.get().getPoolManager().getPool(OrientableRectangle.class).obtain().setTo(x, y, width, height, 0, false, false), 0, 0);
+		
 		IClippingRectangle currentClip = window.getGraphics().getClip();
-		ClipingRectangleUtil.intersect(currentClip, awkwardTransform. x, awkwardTransform.y, awkwardTransform.width, awkwardTransform.height, clipRectangleUtil);
+		ClipingRectangleUtil.intersect(currentClip, orientableRectangle.getX(), orientableRectangle.getY(), orientableRectangle.getWidth(), orientableRectangle.getHeight(), clipRectangleUtil);
 		window.getGraphics().setClip(clipRectangleUtil);
+		orientableRectangle.free();
 	}
 	
 	public void replaceClipRectangle(int x, int y, int width, int height) {
-		AwkwardTransform awkwardTransform = new AwkwardTransform(appliedTransform, x, y, width, height, 0, 0);
-		window.getGraphics().setClip(awkwardTransform. x, awkwardTransform.y, awkwardTransform.width, awkwardTransform.height);
+		OrientableRectangle orientableRectangle = getTransformedRectangle(FlashyEngine.get().getPoolManager().getPool(OrientableRectangle.class).obtain().setTo(x, y, width, height, 0, false, false), 0, 0);
+		window.getGraphics().setClip(orientableRectangle.getX(), orientableRectangle.getY(), orientableRectangle.getWidth(), orientableRectangle.getHeight());
+		orientableRectangle.free();
 	}
 	
 	public void replaceClipRectangleWithInfinite() {
@@ -189,9 +221,11 @@ public class S2dgiDrawCycle implements IDrawCycle {
 
 	public void render(ITexture texture, int x, int y, int width, int height, int centerX, int centerY, int quarterRotations, boolean flipX,
 			boolean flipY) {
-		AwkwardTransform awkwardTransform = new AwkwardTransform(appliedTransform, x, y, width, height, centerX, centerY);
-		window.getGraphics().render(texture, awkwardTransform.x, awkwardTransform.y, awkwardTransform.width,
-				awkwardTransform.height, awkwardTransform.quarterRotations - quarterRotations, flipX ^ awkwardTransform.flipX, flipY ^ awkwardTransform.flipY, false);
+		OrientableRectangle rectangle = FlashyEngine.get().getPoolManager().getPool(OrientableRectangle.class).obtain().setTo(x, y, width, height, quarterRotations, flipX, flipY);
+		getTransformedRectangle(rectangle, centerX, centerY);
+		window.getGraphics().render(texture, rectangle.getX(), rectangle.getY(), rectangle.getWidth(),
+				rectangle.getHeight(), rectangle.getQuarterRotations(), rectangle.getFlipX(), rectangle.getFlipY(), false);
+		rectangle.free();
 	}
 	
 	public void renderTiled(ITexture texture, int offsetX, int offsetY, int x, int y, int width, int height) {
@@ -202,9 +236,11 @@ public class S2dgiDrawCycle implements IDrawCycle {
 		if(width == 0 || height == 0) {
 			return;
 		}
-		AwkwardTransform awkwardTransform = new AwkwardTransform(appliedTransform, x, y, width, height, centerX, centerY);
-		window.getGraphics().renderTiled(texture, offsetX, -offsetY, awkwardTransform.x, awkwardTransform.y,
-				awkwardTransform.width, awkwardTransform.height);
+		OrientableRectangle rectangle = FlashyEngine.get().getPoolManager().getPool(OrientableRectangle.class).obtain().setTo(x, y, width, height, 0, false, false);
+		getTransformedRectangle(rectangle, centerX, centerY);
+		window.getGraphics().renderTiled(texture, offsetX, -offsetY, rectangle.getX(), rectangle.getY(),
+				rectangle.getWidth(), rectangle.getHeight());
+		rectangle.free();
 	}
 	
 	public void renderRectangle(int x, int y, int width, int height, IColor color) {
@@ -212,71 +248,24 @@ public class S2dgiDrawCycle implements IDrawCycle {
 	}
 
 	public void renderRectangle(int x, int y, int width, int height, int centerX, int centerY, IColor color) {
-		AwkwardTransform awkwardTransform = new AwkwardTransform(appliedTransform, x, y, width, height, centerX, centerY);
-		window.getGraphics().renderRectangle(awkwardTransform.x, awkwardTransform.y, awkwardTransform.width,
-				awkwardTransform.height, color, IColor.INTERPRETER);
+		OrientableRectangle rectangle = FlashyEngine.get().getPoolManager().getPool(OrientableRectangle.class).obtain().setTo(x, y, width, height, 0, false, false);
+		getTransformedRectangle(rectangle, centerX, centerY);
+		window.getGraphics().renderRectangle(rectangle.getX(), rectangle.getY(), rectangle.getWidth(),
+				rectangle.getHeight(), color, IColor.INTERPRETER);
+		rectangle.free();
 	}
 
 	public void renderLine(int x1, int y1, int x2, int y2, IColor color) {
-		AwkwardTransform awkwardTransform1 = new AwkwardTransform(appliedTransform, x1, y1, 0, 0, x1, y1);
-		AwkwardTransform awkwardTransform2 = new AwkwardTransform(appliedTransform, x2, y2, 0,0, x2, y2);
-		window.getGraphics().renderLine(awkwardTransform1.x, awkwardTransform1.y, awkwardTransform2.x,
-				awkwardTransform2.y, color, IColor.INTERPRETER);
+		IPoolManager poolManager = FlashyEngine.get().getPoolManager();
+		IPool<IntVector> intVectorPool = poolManager.getPool(IntVector.class);
+		IntVector p1 = getTransformedIntVector(intVectorPool.obtain().setTo(x1, y1), poolManager);
+		IntVector p2 = getTransformedIntVector(intVectorPool.obtain().setTo(x2, y2), poolManager);
+		window.getGraphics().renderLine(p1.getIntX(), p1.getIntY(), p2.getIntX(),
+				p2.getIntY(), color, IColor.INTERPRETER);
+		p1.free();
+		p2.free();
 	}
 
-	private class AwkwardTransform {
-		public final int x;
-		public final int y;
-		public final int width;
-		public final int height;
-		public final int quarterRotations;
-		public final boolean flipX;
-		public final boolean flipY;
-
-		public AwkwardTransform(IReadableTransform transform, int x, int y, int width, int height, int centerX, int centerY) {
-			EasyPooler ep = EasyPooler.obtainFresh();
-			try {
-				int quarterRotations = (int) (2 * transform.getRotation().getTheta() / Mathf.PI + 0.5f);
-				
-				Vector corner1 = ep.obtain(Vector.class).setTo(x, y).add(-centerX, -centerY);
-				Vector corner2 = ep.obtain(Vector.class).setTo(x+width, y+height).add(-centerX, -centerY);
-				reducedTransform(quarterRotations, transform.getScale(), corner1);
-				reducedTransform(quarterRotations, transform.getScale(), corner2);
-				
-				float minX = Math.min(corner1.getX(), corner2.getX());
-				float maxX = Math.max(corner1.getX(), corner2.getX());
-				float minY = Math.min(corner1.getY(), corner2.getY());
-				float maxY = Math.max(corner1.getY(), corner2.getY());
-
-				Position position = ep.obtain(Position.class).setTo(centerX, centerY);
-				transform.transform(position);
-				
-				x = Math.round(position.getX()+minX);
-				y = Math.round(position.getY()+minY);
-				width = (int) (maxX-minX+0.5f);
-				height = (int) (maxY-minY+0.5f);
-				
-				this.width = width;
-				this.height = height;
-				this.x = x;
-				this.y = window.getHeight() - y - this.height;
-				this.quarterRotations = -quarterRotations;
-				this.flipX = transform.getScale().getX() < 0;
-				this.flipY = transform.getScale().getY() < 0;
-			} finally {
-				ep.freeAllAndSelf();
-			}
-		}
-
-		private void reducedTransform(int quarterRot, IReadableVector scale, Vector pos) {
-			pos.hadamardMult(scale);
-			int qcos = ImplementationUtil.qCos(quarterRot);
-			int qsin = ImplementationUtil.qSin(quarterRot);
-			float npx = qcos*pos.getX()-qsin*pos.getY();
-			float npy = qsin*pos.getX()+qcos*pos.getY();
-			pos.setTo(npx, npy);
-		}
-	}
 	
 	private static abstract class ColorAdjustComponent {
 		private final IColor zeroState;

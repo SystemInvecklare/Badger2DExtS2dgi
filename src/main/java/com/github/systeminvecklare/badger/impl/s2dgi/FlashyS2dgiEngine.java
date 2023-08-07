@@ -21,7 +21,12 @@ import com.github.systeminvecklare.badger.core.graphics.framework.smartlist.ISma
 import com.github.systeminvecklare.badger.core.graphics.framework.smartlist.SmartList;
 import com.github.systeminvecklare.badger.core.pooling.FlashyPoolManager;
 import com.github.systeminvecklare.badger.core.pooling.IPoolManager;
+import com.github.systeminvecklare.badger.core.pooling.IPoolRegistry;
+import com.github.systeminvecklare.badger.core.pooling.SimplePool;
 import com.github.systeminvecklare.badger.core.standard.input.keyboard.IKeyPressEvent;
+import com.github.systeminvecklare.badger.impl.s2dgi.drawcycle.IntVector;
+import com.github.systeminvecklare.badger.impl.s2dgi.drawcycle.IntegerTransform;
+import com.github.systeminvecklare.badger.impl.s2dgi.drawcycle.OrientableRectangle;
 import com.github.systeminvecklare.badger.impl.s2dgi.graphics.ITextureReference;
 
 import net.pointlessgames.libs.s2dgi.clipboard.ISimpleClipboard;
@@ -33,7 +38,7 @@ public class FlashyS2dgiEngine implements IFlashyEngine {
 	private final IPoolManager poolManager;
 	
 	public FlashyS2dgiEngine() {
-		this(new FlashyPoolManager());
+		this(registerExtraPools(new FlashyPoolManager()));
 	}
 	
 	public FlashyS2dgiEngine(IPoolManager poolManager) {
@@ -43,6 +48,28 @@ public class FlashyS2dgiEngine implements IFlashyEngine {
 	@Override
 	public IPoolManager getPoolManager() {
 		return poolManager;
+	}
+	
+	public static <T extends IPoolRegistry> T registerExtraPools(T registry) {
+		registry.registerPool(IntVector.class, new SimplePool<IntVector>(0, 30) {
+			@Override
+			public IntVector newObject() {
+				return new IntVector(this);
+			}
+		});
+		registry.registerPool(OrientableRectangle.class, new SimplePool<OrientableRectangle>(0, 30) {
+			@Override
+			public OrientableRectangle newObject() {
+				return new OrientableRectangle(this);
+			}
+		});
+		registry.registerPool(IntegerTransform.class, new SimplePool<IntegerTransform>(0, 30) {
+			@Override
+			public IntegerTransform newObject() {
+				return new IntegerTransform(this);
+			}
+		});
+		return registry;
 	}
 
 	@Override
