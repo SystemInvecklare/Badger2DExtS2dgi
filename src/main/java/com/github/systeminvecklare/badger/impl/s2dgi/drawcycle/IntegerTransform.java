@@ -250,6 +250,12 @@ public class IntegerTransform implements IReadableIntegerTransform, IPoolable {
 		pool.free(this);
 	}
 	
+	@Override
+	public IntegerTransform copy(IPool<IntegerTransform> pool) {
+		IntegerTransform copy = pool == null ? new IntegerTransform(null) : pool.obtain();
+		return copy.setTo(this);
+	}
+	
 //	//TODO move into unit tests
 //	private static void test(IReadableIntegerTransform transformA, IReadableIntegerTransform transformB, IReadableIntVector vector) {
 //		IntVector v = new IntVector(null).setTo(vector);
