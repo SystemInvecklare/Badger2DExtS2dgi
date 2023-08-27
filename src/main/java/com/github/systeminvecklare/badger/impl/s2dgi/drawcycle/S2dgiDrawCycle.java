@@ -153,25 +153,43 @@ public class S2dgiDrawCycle implements IDrawCycle {
 	}
 	
 	private OrientableRectangle getTransformedRectangle(OrientableRectangle result, int centerX, int centerY) {
+		// 1. get the center, apply full transform
+		// 2. apply the core (scale + rot) of the transform to the rectangle, relative to the center
+		// 3. Use the transformed center to adjust the transformed rectangle.
+		
+		Position center = FlashyEngine.get().getPoolManager().getPool(Position.class).obtain().setTo(centerX, centerY);
+		result.add(-centerX, -centerY);
+		
+		appliedTransform.transform(center);
+		
 		int quarterRotations = Mathf.mod((int) (2 * appliedTransform.getRotation().getTheta() / Mathf.PI + 0.5f), 4);
-		IntegerTransform integerTransform = FlashyEngine.get().getPoolManager().getPool(IntegerTransform.class).obtain().setToIdentity().setQuarterRotations(quarterRotations).setPosition(Math.round(appliedTransform.getPosition().getX()), Math.round(appliedTransform.getPosition().getY()));
+		IntegerTransform integerTransform = FlashyEngine.get().getPoolManager().getPool(IntegerTransform.class).obtain().setToIdentity().setQuarterRotations(quarterRotations);
 		
 		float sx = appliedTransform.getScale().getX();
 		float sy = appliedTransform.getScale().getY();
-		int x = result.getX() - centerX;
-		int y = result.getY() - centerY;
-		int width = result.getWidth();
-		int height = result.getHeight();
-		result.setTo(0, 0, 1, 1, result.getQuarterRotations(), result.getFlipX(), result.getFlipY()).scale(Math.round(width*sx), Math.round(height*sy)).add(Math.round(x*sx), Math.round(y*sy));
+		
+		int scaledX = Math.round(sx*result.getX());
+		int scaledY = Math.round(sy*result.getY());
+		int scaledWidth = Math.round(sx*result.getWidth());
+		int scaledHeight = Math.round(sy*result.getHeight());
+		boolean scaledFlipX = sx > 0 ? result.getFlipX() : !result.getFlipX();
+		boolean scaledFlipY = sy > 0 ? result.getFlipY() : !result.getFlipY();
+		
+		result.setTo(scaledX, scaledY, scaledWidth, scaledHeight, result.getQuarterRotations(), scaledFlipX, scaledFlipY);
+		
 		integerTransform.transform(result);
-		result.add(centerX, centerY);
+		
+		result.add(Math.round(center.getX()), Math.round(center.getY()));
+		
+		{//Flip screenY
+			integerTransform.setToIdentity().setScale(1, -1).addToPosition(0, window.getHeight()).transform(result);
+			result.setFlipY(!result.getFlipY());
+		}
 		
 		integerTransform.free();
+		center.free();
 		
-//		return result;
-		//return result.scale(1, -1).add(0, window.getHeight());
-//		return result.setFlipY(!result.getFlipY()).scale(1, -1).add(0, window.getHeight());
-		return result.flipYAxis(window.getHeight());
+		return result;
 	}
 	
 	private IntVector getTransformedIntVector(IntVector result, IPoolManager poolManager) {

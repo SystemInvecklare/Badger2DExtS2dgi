@@ -219,13 +219,12 @@ public class OrientableRectangle implements IRectangle, IPoolable {
 		return builder.toString();
 	}
 	
-	public OrientableRectangle flipYAxis(int windowHeight) {
-		this.flipY = !this.flipY;
-		int rot = getQuarterRotations();
-		scale(1, -1).add(0, windowHeight);
-		setQuarterRotations(-rot);
-//		return result.setFlipY(!result.getFlipY()).scale(1, -1).add(0, window.getHeight());
-		return this;
+	public OrientableRectangle setFlipX(boolean flipX) {
+		return setTo(getX(), getY(), getWidth(), getHeight(), getQuarterRotations(), flipX, getFlipY());
+	}
+	
+	public OrientableRectangle setFlipY(boolean flipY) {
+		return setTo(getX(), getY(), getWidth(), getHeight(), getQuarterRotations(), getFlipX(), flipY);
 	}
 	
 	@Override
