@@ -1,10 +1,10 @@
 apply plugin: "java-library"
-apply plugin: "maven"
+apply plugin: "maven-publish"
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 group = 'com.github.SystemInvecklare'
-
+version = 'r0.15--v0.8--0.1'
 
 repositories {
 	mavenCentral()
@@ -16,7 +16,7 @@ sourceSets.main.resources.srcDirs = ["src/main/java"]
 
 dependencies {
 	//implementation "com.github.SystemInvecklare:Badger2DCore:r0.15.0"
-	implementation 'com.github.SystemInvecklare:Simple2DGraphicsInterface:v0.7'
+	implementation 'com.github.SystemInvecklare:Simple2DGraphicsInterface:v0.8'
 	implementation project(':Badger2DCore')
 	testImplementation 'junit:junit:4.12'
 }

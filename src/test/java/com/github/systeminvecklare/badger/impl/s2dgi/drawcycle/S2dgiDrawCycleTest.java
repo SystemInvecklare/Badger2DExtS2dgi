@@ -63,8 +63,9 @@ public class S2dgiDrawCycleTest {
 		drawCycle.getTransform().multiplyScale(-1, 2);
 		drawCycle.applyTransforms();
 		drawCycle.render(new MockTexture("other", 17, 10), 5, 31, 17, 10, 5, 31, 0, false, false);
+		drawCycle.render(new MockTexture("other", 30, 20), 5, 17, 30, 20, 0, 0, 3, false, false);
 		
-		Assert.assertEquals(2, mockGraphics.renderLog.size());
+		Assert.assertEquals(3, mockGraphics.renderLog.size());
 		
 		{
 			RenderLogEntry entry = mockGraphics.renderLog.get(0);
@@ -88,6 +89,18 @@ public class S2dgiDrawCycleTest {
 			Assert.assertEquals(false, entry.rotateDimensions);
 			Assert.assertEquals(-22, entry.x);
 			Assert.assertEquals(28, entry.y);
+		}
+		
+		{
+			RenderLogEntry entry = mockGraphics.renderLog.get(2);
+			Assert.assertEquals(30, entry.width);
+			Assert.assertEquals(40, entry.height);
+			Assert.assertEquals(true, entry.flipX);
+			Assert.assertEquals(false, entry.flipY);
+			Assert.assertEquals(1, entry.quarterRotations);
+			Assert.assertEquals(false, entry.rotateDimensions);
+			Assert.assertEquals(-35, entry.x);
+			Assert.assertEquals(110-2*17-40, entry.y);
 		}
 	}
 	

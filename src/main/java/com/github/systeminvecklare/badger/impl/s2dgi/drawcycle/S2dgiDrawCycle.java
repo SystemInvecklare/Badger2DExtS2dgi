@@ -155,8 +155,10 @@ public class S2dgiDrawCycle implements IDrawCycle {
 	private OrientableRectangle getTransformedRectangle(OrientableRectangle result, int centerX, int centerY) {
 		// 1. get the center, apply full transform
 		// 2. apply the core (scale + rot) of the transform to the rectangle, relative to the center
+			// -> First scale fractionally
+			// -> Then apply transform
 		// 3. Use the transformed center to adjust the transformed rectangle.
-		
+
 		Position center = FlashyEngine.get().getPoolManager().getPool(Position.class).obtain().setTo(centerX, centerY);
 		result.add(-centerX, -centerY);
 		
@@ -174,6 +176,14 @@ public class S2dgiDrawCycle implements IDrawCycle {
 		int scaledHeight = Math.round(sy*result.getHeight());
 		boolean scaledFlipX = sx > 0 ? result.getFlipX() : !result.getFlipX();
 		boolean scaledFlipY = sy > 0 ? result.getFlipY() : !result.getFlipY();
+		if(scaledWidth < 0) {
+			scaledX += scaledWidth;
+			scaledWidth = -scaledWidth;
+		}
+		if(scaledHeight < 0) {
+			scaledY += scaledHeight;
+			scaledHeight = -scaledHeight;
+		}
 		
 		result.setTo(scaledX, scaledY, scaledWidth, scaledHeight, result.getQuarterRotations(), scaledFlipX, scaledFlipY);
 		
@@ -201,8 +211,14 @@ public class S2dgiDrawCycle implements IDrawCycle {
 		return result.scale(1, -1).add(0, window.getHeight());
 	}
 	
+	private OrientableRectangle borrowRectangleClampSize(int x, int y, int width, int height) {
+		width = Math.max(width, 0);
+		height = Math.max(height, 0);
+		return FlashyEngine.get().getPoolManager().getPool(OrientableRectangle.class).obtain().setTo(x, y, width, height, 0, false, false);
+	}
+	
 	public void clipRectangle(int x, int y, int width, int height) {
-		OrientableRectangle orientableRectangle = getTransformedRectangle(FlashyEngine.get().getPoolManager().getPool(OrientableRectangle.class).obtain().setTo(x, y, width, height, 0, false, false), 0, 0);
+		OrientableRectangle orientableRectangle = getTransformedRectangle(borrowRectangleClampSize(x, y, width, height), 0, 0);
 		
 		IClippingRectangle currentClip = window.getGraphics().getClip();
 		ClipingRectangleUtil.intersect(currentClip, orientableRectangle.getX(), orientableRectangle.getY(), orientableRectangle.getWidth(), orientableRectangle.getHeight(), clipRectangleUtil);
@@ -211,7 +227,7 @@ public class S2dgiDrawCycle implements IDrawCycle {
 	}
 	
 	public void replaceClipRectangle(int x, int y, int width, int height) {
-		OrientableRectangle orientableRectangle = getTransformedRectangle(FlashyEngine.get().getPoolManager().getPool(OrientableRectangle.class).obtain().setTo(x, y, width, height, 0, false, false), 0, 0);
+		OrientableRectangle orientableRectangle = getTransformedRectangle(borrowRectangleClampSize(x, y, width, height), 0, 0);
 		window.getGraphics().setClip(orientableRectangle.getX(), orientableRectangle.getY(), orientableRectangle.getWidth(), orientableRectangle.getHeight());
 		orientableRectangle.free();
 	}
@@ -241,6 +257,7 @@ public class S2dgiDrawCycle implements IDrawCycle {
 			boolean flipY) {
 		OrientableRectangle rectangle = FlashyEngine.get().getPoolManager().getPool(OrientableRectangle.class).obtain().setTo(x, y, width, height, quarterRotations, flipX, flipY);
 		getTransformedRectangle(rectangle, centerX, centerY);
+		
 		window.getGraphics().render(texture, rectangle.getX(), rectangle.getY(), rectangle.getWidth(),
 				rectangle.getHeight(), rectangle.getQuarterRotations(), rectangle.getFlipX(), rectangle.getFlipY(), false);
 		rectangle.free();
@@ -251,10 +268,10 @@ public class S2dgiDrawCycle implements IDrawCycle {
 	}
 
 	public void renderTiled(ITexture texture, int offsetX, int offsetY, int x, int y, int width, int height, int centerX, int centerY) {
-		if(width == 0 || height == 0) {
+		if(width <= 0 || height <= 0) {
 			return;
 		}
-		OrientableRectangle rectangle = FlashyEngine.get().getPoolManager().getPool(OrientableRectangle.class).obtain().setTo(x, y, width, height, 0, false, false);
+		OrientableRectangle rectangle = borrowRectangleClampSize(x, y, width, height);
 		getTransformedRectangle(rectangle, centerX, centerY);
 		window.getGraphics().renderTiled(texture, offsetX, -offsetY, rectangle.getX(), rectangle.getY(),
 				rectangle.getWidth(), rectangle.getHeight());
@@ -265,7 +282,16 @@ public class S2dgiDrawCycle implements IDrawCycle {
 		renderRectangle(x, y, width, height, 0, 0, color);
 	}
 
+	//TODO We need to define behaviour of these methods for all possible argument values
 	public void renderRectangle(int x, int y, int width, int height, int centerX, int centerY, IColor color) {
+		if(width < 0) {
+			x += width;
+			width = -width;
+		}
+		if(height < 0) {
+			y += height;
+			height = -height;
+		}
 		OrientableRectangle rectangle = FlashyEngine.get().getPoolManager().getPool(OrientableRectangle.class).obtain().setTo(x, y, width, height, 0, false, false);
 		getTransformedRectangle(rectangle, centerX, centerY);
 		window.getGraphics().renderRectangle(rectangle.getX(), rectangle.getY(), rectangle.getWidth(),

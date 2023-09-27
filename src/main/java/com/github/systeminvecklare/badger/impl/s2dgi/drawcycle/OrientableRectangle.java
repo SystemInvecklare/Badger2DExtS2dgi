@@ -31,6 +31,12 @@ public class OrientableRectangle implements IRectangle, IPoolable {
 	
 	public OrientableRectangle setTo(int x, int y, int width, int height, int quarterRotations, boolean flipX,
 			boolean flipY) {
+		if(width < 0) {
+			throw new IllegalArgumentException("Expected width >= 0, but was "+width);
+		}
+		if(height< 0) {
+			throw new IllegalArgumentException("Expected height >= 0, but was "+height);
+		}
 		this.position.setTo(x, y);
 		this.corner.setTo(position).add(width, height);
 		this.flipX = flipX;

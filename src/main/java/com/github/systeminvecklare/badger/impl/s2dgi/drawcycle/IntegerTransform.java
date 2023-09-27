@@ -1,8 +1,22 @@
 package com.github.systeminvecklare.badger.impl.s2dgi.drawcycle;
 
 import com.github.systeminvecklare.badger.core.graphics.components.FlashyEngine;
+import com.github.systeminvecklare.badger.core.graphics.components.transform.AbstractTransform;
+import com.github.systeminvecklare.badger.core.graphics.components.transform.IReadableTransform;
+import com.github.systeminvecklare.badger.core.graphics.components.transform.ITransform;
+import com.github.systeminvecklare.badger.core.graphics.components.transform.Transform;
+import com.github.systeminvecklare.badger.core.math.AbstractPosition;
+import com.github.systeminvecklare.badger.core.math.AbstractRotation;
+import com.github.systeminvecklare.badger.core.math.AbstractVector;
+import com.github.systeminvecklare.badger.core.math.IReadableDeltaRotation;
+import com.github.systeminvecklare.badger.core.math.IReadablePosition;
+import com.github.systeminvecklare.badger.core.math.IReadableRotation;
+import com.github.systeminvecklare.badger.core.math.IReadableVector;
 import com.github.systeminvecklare.badger.core.math.Mathf;
+import com.github.systeminvecklare.badger.core.math.Position;
+import com.github.systeminvecklare.badger.core.pooling.EasyPooler;
 import com.github.systeminvecklare.badger.core.pooling.IPool;
+import com.github.systeminvecklare.badger.core.pooling.IPoolManager;
 import com.github.systeminvecklare.badger.core.pooling.IPoolable;
 import com.github.systeminvecklare.badger.core.pooling.SimplePool;
 
@@ -18,6 +32,8 @@ public class IntegerTransform implements IReadableIntegerTransform, IPoolable {
 	private final IntVector position = new IntVector(null).setTo(0, 0);
 	private int quarterRotations = 0;
 	private final IntVector scale = new IntVector(null).setTo(1, 1);
+	
+	private final IReadableTransform fullTransformInterface = new FullTransformInterface();
 	
 	public IntegerTransform(IPool<? super IntegerTransform> pool) {
 		this.pool = pool;
@@ -254,6 +270,90 @@ public class IntegerTransform implements IReadableIntegerTransform, IPoolable {
 	public IntegerTransform copy(IPool<IntegerTransform> pool) {
 		IntegerTransform copy = pool == null ? new IntegerTransform(null) : pool.obtain();
 		return copy.setTo(this);
+	}
+	
+	public IReadableTransform asFullTransform() {
+		return fullTransformInterface;
+	}
+	
+	private class FullTransformInterface implements IReadableTransform {
+		private final IReadablePosition position = new AbstractPosition() {
+			@Override
+			public float getX() {
+				return IntegerTransform.this.position.getIntX();
+			}
+			
+			@Override
+			public float getY() {
+				return IntegerTransform.this.position.getIntY();
+			}
+		};
+		private final IReadableRotation rotation = new AbstractRotation() {
+			
+			@Override
+			public float getTheta() {
+				return IntegerTransform.this.quarterRotations*Mathf.PI/2f;
+			}
+		};
+		private final IReadableVector scale = new AbstractVector() {
+			@Override
+			public float getX() {
+				return IntegerTransform.this.scale.getIntX();
+			}
+
+			@Override
+			public float getY() {
+				return IntegerTransform.this.scale.getIntY();
+			}
+			
+		};
+		
+		@Override
+		public ITransform copy() {
+			return new Transform(null).setTo(this);
+		}
+
+		@Override
+		public ITransform copy(IPool<ITransform> pool) {
+			return pool.obtain().setTo(this);
+		}
+
+		@Override
+		public ITransform copy(EasyPooler ep) {
+			return ep.obtain(ITransform.class).setTo(this);
+		}
+
+		@Override
+		public ITransform copy(IPoolManager poolManager) {
+			return copy(poolManager.getPool(ITransform.class));
+		}
+
+		@Override
+		public IReadablePosition getPosition() {
+			return position;
+		}
+
+		@Override
+		public IReadableRotation getRotation() {
+			return rotation;
+		}
+
+		@Override
+		public IReadableVector getScale() {
+			return scale;
+		}
+
+		@Override
+		public float getShear() {
+			return 0;
+		}
+
+		@Override
+		public void transform(Position argumentAndResult) {
+			IntVector intVector = new IntVector(null).setTo(Math.round(argumentAndResult.getX()), Math.round(argumentAndResult.getY()));
+			IntegerTransform.this.transform(intVector);
+			argumentAndResult.setTo(intVector.getX(), intVector.getY());
+		}
 	}
 	
 //	//TODO move into unit tests
