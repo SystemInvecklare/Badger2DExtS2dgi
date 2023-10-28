@@ -15,6 +15,7 @@ import com.github.systeminvecklare.badger.core.graphics.framework.engine.SceneMa
 import com.github.systeminvecklare.badger.core.graphics.framework.engine.gameloop.GameLoop;
 import com.github.systeminvecklare.badger.core.graphics.framework.engine.gameloop.GameLoopHooksAdapter;
 import com.github.systeminvecklare.badger.core.graphics.framework.engine.gameloop.IGameLoop;
+import com.github.systeminvecklare.badger.core.graphics.framework.engine.gameloop.IGameLoopHooks;
 import com.github.systeminvecklare.badger.core.graphics.framework.engine.inputprocessor.IInputHandler;
 import com.github.systeminvecklare.badger.impl.s2dgi.FlashyS2dgiEngine;
 import com.github.systeminvecklare.badger.impl.s2dgi.drawcycle.S2dgiDrawCycle;
@@ -40,7 +41,7 @@ public abstract class AbstractS2dgiHelper implements ISceneManager {
 	private long lastTime = -1;
 	
 	public AbstractS2dgiHelper(FlashyS2dgiEngine flashys2dgiEngine) {
-		this(flashys2dgiEngine ,60);
+		this(flashys2dgiEngine, 60);
 	}
 	
 	public AbstractS2dgiHelper(FlashyS2dgiEngine flashys2dgiEngine, int stepsPerSeconds) {
@@ -62,9 +63,8 @@ public abstract class AbstractS2dgiHelper implements ISceneManager {
 		this.inputHandler = new ExtraFlashyInputHandler(createHeightSource(mainWindow));
 		
 		this.currentScene = getInitialScene();
-		
-		this.gameLoop = new GameLoop(inputHandler, applicationContext, new GameLoopHooksAdapter()) {
-			
+		IGameLoopHooks hooks = createHooks();
+		this.gameLoop = new GameLoop(inputHandler, applicationContext, hooks != null ? hooks : new GameLoopHooksAdapter()) {
 			@Override
 			protected IScene getCurrentScene() {
 				return currentScene;
@@ -89,6 +89,10 @@ public abstract class AbstractS2dgiHelper implements ISceneManager {
 	}
 
 	protected abstract IScene getInitialScene();
+	
+	protected IGameLoopHooks createHooks() {
+		return null;
+	}
 
 	public void executeGameLoop() {
 		long timeNow = System.nanoTime();
